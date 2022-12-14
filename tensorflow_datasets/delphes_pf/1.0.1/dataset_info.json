@@ -1,0 +1,34 @@
+{
+  "description": "Dataset generated with Delphes.\n\nTTbar events with PU~200.",
+  "fileFormat": "tfrecord",
+  "moduleName": "delphes_pf",
+  "name": "delphes_pf",
+  "splits": [
+    {
+      "name": "train",
+      "numBytes": "732234800",
+      "shardLengths": [
+        "138",
+        "137",
+        "137",
+        "138",
+        "138",
+        "137",
+        "137",
+        "138"
+      ]
+    },
+    {
+      "name": "test",
+      "numBytes": "66566800",
+      "shardLengths": [
+        "100"
+      ]
+    }
+  ],
+  "supervisedKeys": {
+    "input": "X",
+    "output": "ygen"
+  },
+  "version": "1.0.1"
+}

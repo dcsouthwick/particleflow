@@ -11,13 +11,16 @@ dataset:
   num_output_classes: 6
   num_momentum_outputs: 5
   padded_num_elem_size: 6400
+  cls_weight_by_pt: no
+
+loss:
   classification_loss_coef: 1.0
   charge_loss_coef: 1.0
-  pt_loss_coef: 100.0
-  eta_loss_coef: 100.0
-  sin_phi_loss_coef: 100.0
-  cos_phi_loss_coef: 100.0
-  energy_loss_coef: 100.0
+  pt_loss_coef: 1.0
+  eta_loss_coef: 1.0
+  sin_phi_loss_coef: 1.0
+  cos_phi_loss_coef: 1.0
+  energy_loss_coef: 1.0
   energy_loss:
     type: Huber
     delta: 1.0
@@ -33,6 +36,10 @@ dataset:
   eta_loss:
     type: Huber
     delta: 0.1
+  event_loss: none
+  event_loss_coef: 0.0
+  met_loss: none
+  met_loss_coef: 1.0
 
 tensorflow:
   eager: no
@@ -41,10 +48,10 @@ setup:
   train: yes
   weights:
   weights_config:
-  lr: 1e-4
+  lr: 1e-5
   num_events_train: 45000
   num_events_test: 5000
-  num_events_validation: 5000
+  num_events_validation: 10
   num_epochs: 10
   num_val_files: 5
   dtype: float32
@@ -52,10 +59,35 @@ setup:
   classification_loss_type: categorical_cross_entropy
   lr_schedule: exponentialdecay  # exponentialdecay, onecycle
   optimizer: adam  # adam, adamw, sgd
+  horovod_enabled: False
+  cls_output_as_logits: False
+  small_graph_opt: no
+
+batching:
+  # if enabled, use dynamic batching instead of the fixed-size batches configured in batch_per_gpu
+  bucket_by_sequence_length: yes
+  # these sizes were sort of tuned for an 8GB GPU
+  # - max_sequence_length, batch_size_per_gpu
+  bucket_batch_sizes:
+    - 25, 400
+    - 50, 200
+    - 100, 100
+    - 200, 50
+    - 500, 25
+    - 1000, 10
+    - 2000, 8
+    - 3000, 7
+    - 4000, 6
+    - 5000, 5
+    - 6000, 4
+    - inf, 2
+  # use this batch multiplier to increase all batch sizes by a constant factor
+  batch_multiplier: 1
 
 optimizer:
   adam:
     amsgrad: no
+    pcgrad: no
   adamw:
     amsgrad: yes
     weight_decay: 0.001
@@ -104,22 +136,21 @@ parameters:
       type: NodePairGaussianKernel
       dist_mult: 0.1
       clip_value_low: 0.0
+      dist_norm: l2
     node_message:
       type: GHConvDense
       output_dim: 256
       activation: elu
       normalize_degrees: yes
     activation: elu
-  num_graph_layers_common: 3
-  num_graph_layers_energy: 3
+  num_graph_layers_id: 3
+  num_graph_layers_reg: 3
   output_decoding:
     activation: elu
     regression_use_classification: yes
     dropout: 0.0
 
-    pt_skip_gate: yes
-    eta_skip_gate: yes
-    phi_skip_gate: yes
+    pt_as_correction: no
 
     id_dim_decrease: yes
     charge_dim_decrease: yes
@@ -216,10 +247,13 @@ train_test_datasets:
     datasets:
       - delphes_pf
 
-validation_dataset: delphes_pf
+validation_datasets:
+ - delphes_pf
+
+validation_batch_size: 5
 
 datasets:
   delphes_pf:
     version: 1.0.1
-    data_dir: ../tensorflow_datasets
+    data_dir: tensorflow_datasets
     manual_dir:
