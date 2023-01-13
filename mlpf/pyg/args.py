@@ -10,12 +10,7 @@ def parse_args():
 
     # for saving the model
     parser.add_argument("--outpath", type=str, default="../experiments/", help="output folder")
-    parser.add_argument(
-        "--model_prefix",
-        type=str,
-        default="MLPF_model",
-        help="directory to hold the model and all plots under args.outpath/args.model_prefix",
-    )
+    parser.add_argument("--model_prefix", type=str, default="MLPF_model", help="directory to hold the model and all plots")
 
     # for loading the data
     parser.add_argument("--data", type=str, required=True, help="cms or delphes?")
@@ -45,11 +40,7 @@ def parse_args():
     )
     parser.add_argument("--patience", type=int, default=30, help="patience before early stopping")
     parser.add_argument(
-        "--target",
-        type=str,
-        default="gen",
-        choices=["cand", "gen"],
-        help="Regress to PFCandidates or GenParticles",
+        "--target", type=str, default="gen", choices=["cand", "gen"], help="Regress to PFCandidates or GenParticles"
     )
     parser.add_argument("--lr", type=float, default=1e-4, help="learning rate")
     parser.add_argument(
@@ -74,10 +65,8 @@ def parse_args():
     )
     parser.add_argument("--embedding_dim", type=int, default=32, help="encoded element dimension")
     parser.add_argument("--num_convs", type=int, default=3, help="number of graph convolutions")
-    parser.add_argument("--space_dim", type=int, default=4, help="Spatial dimension for clustering in gravnet layer")
-    parser.add_argument(
-        "--propagate_dim", type=int, default=8, help="The number of features to be propagated between the vertices"
-    )
+    parser.add_argument("--space_dim", type=int, default=4, help="Gravnet hyperparameter")
+    parser.add_argument("--propagate_dim", type=int, default=8, help="Gravnet hyperparameter")
     parser.add_argument("--nearest", type=int, default=4, help="k nearest neighbors in gravnet layer")
 
     # for testing the model

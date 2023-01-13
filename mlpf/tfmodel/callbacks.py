@@ -32,7 +32,10 @@ class CustomTensorBoard(TensorBoard):
         if hasattr(opt, "lr"):
 
             lr_schedule = getattr(opt, "lr", None)
-            if isinstance(lr_schedule, tf.keras.optimizers.schedules.LearningRateSchedule):
+            if isinstance(
+                lr_schedule,
+                tf.keras.optimizers.schedules.LearningRateSchedule,
+            ):
                 logs["learning_rate"] = np.float64(tf.keras.backend.get_value(lr_schedule(opt.iterations)))
             else:
                 logs.update({"learning_rate": np.float64(tf.keras.backend.eval(opt.lr))})
@@ -98,7 +101,7 @@ class CustomModelCheckpoint(ModelCheckpoint):
                     pickle.dump(self.optimizer_to_save, f)
 
 
-class BenchmarkLogggerCallback(tf.keras.callbacks.Callback):
+class BenchmarkLoggerCallback(tf.keras.callbacks.Callback):
     def __init__(self, *args, **kwargs):
         # Added arguments
         self.outdir = kwargs.pop("outdir")
