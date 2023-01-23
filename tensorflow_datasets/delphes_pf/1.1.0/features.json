@@ -1,0 +1,46 @@
+{
+    "pythonClassName": "tensorflow_datasets.core.features.features_dict.FeaturesDict",
+    "featuresDict": {
+        "features": {
+            "X": {
+                "pythonClassName": "tensorflow_datasets.core.features.tensor_feature.Tensor",
+                "tensor": {
+                    "shape": {
+                        "dimensions": [
+                            "-1",
+                            "12"
+                        ]
+                    },
+                    "dtype": "float32",
+                    "encoding": "none"
+                }
+            },
+            "ycand": {
+                "pythonClassName": "tensorflow_datasets.core.features.tensor_feature.Tensor",
+                "tensor": {
+                    "shape": {
+                        "dimensions": [
+                            "-1",
+                            "8"
+                        ]
+                    },
+                    "dtype": "float32",
+                    "encoding": "none"
+                }
+            },
+            "ygen": {
+                "pythonClassName": "tensorflow_datasets.core.features.tensor_feature.Tensor",
+                "tensor": {
+                    "shape": {
+                        "dimensions": [
+                            "-1",
+                            "8"
+                        ]
+                    },
+                    "dtype": "float32",
+                    "encoding": "none"
+                }
+            }
+        }
+    }
+}

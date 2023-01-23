@@ -1,0 +1,56 @@
+{
+  "description": "Dataset generated with Delphes.\n\nTTbar and QCD events with PU~200.",
+  "fileFormat": "tfrecord",
+  "moduleName": "delphes_pf",
+  "name": "delphes_pf",
+  "releaseNotes": {
+    "1.0.0": "Initial release.",
+    "1.1.0": "Do not pad events to the same size"
+  },
+  "splits": [
+    {
+      "filepathTemplate": "{DATASET}-{SPLIT}.{FILEFORMAT}-{SHARD_X_OF_Y}",
+      "name": "train",
+      "numBytes": "1127511088",
+      "shardLengths": [
+        "125",
+        "125",
+        "125",
+        "125",
+        "125",
+        "125",
+        "125",
+        "125",
+        "125",
+        "125",
+        "125",
+        "125",
+        "125",
+        "125",
+        "125",
+        "125"
+      ]
+    },
+    {
+      "filepathTemplate": "{DATASET}-{SPLIT}.{FILEFORMAT}-{SHARD_X_OF_Y}",
+      "name": "test",
+      "numBytes": "112120000",
+      "shardLengths": [
+        "200"
+      ]
+    }
+  ],
+  "supervisedKeys": {
+    "tuple": {
+      "items": [
+        {
+          "featureKey": "X"
+        },
+        {
+          "featureKey": "ygen"
+        }
+      ]
+    }
+  },
+  "version": "1.1.0"
+}
