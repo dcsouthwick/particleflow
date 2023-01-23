@@ -1,39 +1,23 @@
 awkward
-boost_histogram
-click
+boost-histogram
 comet-ml
 fastjet
 fsspec
-keras
-keras-tuner
-matplotlib
-mplhep
-networkx
-nevergrad
-notebook
 numba
-onnxruntime
 pandas
-papermill
-plotly
-pre-commit
 pyarrow
-ray[default]
-ray[tune]
-scikit-learn
-scikit-optimize
+pyyaml
 scipy
 seaborn
-setGPU
-tensorflow
 tensorflow-addons
-tensorflow-datasets
-tensorflow-estimator
-tensorflow-probability
-tensorflow-text
-tf-models-official
-tf2onnx
-tqdm
-uproot
-vector
-zenodo_get
+tensorflow-datasets<=4.8.1
+tensorflow
+
+
+
+## For dataset preparation/generation
+# smaller requirement set:
+# awkward
+# fastjet
+# tensorflow
+# tensorflow-datasets<=4.8.1

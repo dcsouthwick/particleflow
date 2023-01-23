@@ -11,13 +11,17 @@ dataset:
   num_output_classes: 6
   num_momentum_outputs: 5
   padded_num_elem_size: 6400
+  cls_weight_by_pt: no
+  reg_weight_by_pt: no
+
+loss:
   classification_loss_coef: 1.0
   charge_loss_coef: 1.0
-  pt_loss_coef: 100.0
-  eta_loss_coef: 100.0
-  sin_phi_loss_coef: 100.0
-  cos_phi_loss_coef: 100.0
-  energy_loss_coef: 100.0
+  pt_loss_coef: 1.0
+  eta_loss_coef: 1.0
+  sin_phi_loss_coef: 1.0
+  cos_phi_loss_coef: 1.0
+  energy_loss_coef: 1.0
   energy_loss:
     type: Huber
     delta: 1.0
@@ -33,6 +37,10 @@ dataset:
   eta_loss:
     type: Huber
     delta: 0.1
+  event_loss: none
+  event_loss_coef: 0.0
+  met_loss: none
+  met_loss_coef: 1.0
 
 tensorflow:
   eager: no
@@ -41,10 +49,10 @@ setup:
   train: yes
   weights:
   weights_config:
-  lr: 1e-4
+  lr: 1e-5
   num_events_train: 45000
   num_events_test: 5000
-  num_events_validation: 5000
+  num_events_validation: 10
   num_epochs: 10
   num_val_files: 5
   dtype: float32
@@ -52,10 +60,35 @@ setup:
   classification_loss_type: categorical_cross_entropy
   lr_schedule: exponentialdecay  # exponentialdecay, onecycle
   optimizer: adam  # adam, adamw, sgd
+  horovod_enabled: False
+  cls_output_as_logits: False
+  small_graph_opt: no
+
+batching:
+  # if enabled, use dynamic batching instead of the fixed-size batches configured in batch_per_gpu
+  bucket_by_sequence_length: yes
+  # these sizes were sort of tuned for an 8GB GPU
+  # - max_sequence_length, batch_size_per_gpu
+  bucket_batch_sizes:
+    - 25, 160
+    - 50, 80
+    - 100, 40
+    - 200, 20
+    - 500, 10
+    - 1000, 5
+    - 2000, 3
+    - 3000, 2
+    - 4000, 2
+    - 5000, 1
+    - 6000, 1
+    - inf, 1
+  # use this batch multiplier to increase all batch sizes by a constant factor
+  batch_multiplier: 1
 
 optimizer:
   adam:
     amsgrad: no
+    pcgrad: no
   adamw:
     amsgrad: yes
     weight_decay: 0.001
@@ -87,9 +120,9 @@ sample_weights:
 parameters:
   model: gnn_dense
   input_encoding: default
-  node_update_mode: concat
-  do_node_encoding: no
-  node_encoding_hidden_dim: 128
+  node_update_mode: additive
+  do_node_encoding: yes
+  node_encoding_hidden_dim: 512
   combined_graph_layer:
     bin_size: 640
     max_num_bins: 100
@@ -104,22 +137,21 @@ parameters:
       type: NodePairGaussianKernel
       dist_mult: 0.1
       clip_value_low: 0.0
+      dist_norm: l2
     node_message:
       type: GHConvDense
-      output_dim: 256
+      output_dim: 512
       activation: elu
       normalize_degrees: yes
     activation: elu
-  num_graph_layers_common: 3
-  num_graph_layers_energy: 3
+  num_graph_layers_id: 3
+  num_graph_layers_reg: 3
   output_decoding:
     activation: elu
     regression_use_classification: yes
     dropout: 0.0
 
-    pt_skip_gate: yes
-    eta_skip_gate: yes
-    phi_skip_gate: yes
+    pt_as_correction: no
 
     id_dim_decrease: yes
     charge_dim_decrease: yes
@@ -179,36 +211,23 @@ hypertune:
 
 raytune:
   local_dir:  # Note: please specify an absolute path
-  sched: "asha"  # asha, hyperband
-  parameters:
-    # optimizer parameters
-    lr: [1e-4]
-    batch_size: [32]
-    expdecay_decay_steps: [10000]
-    # model parameters
-    combined_graph_layer:
-      layernorm: [False]
-      hidden_dim: [64, 128, 256]
-      distance_dim: [128, 256]
-      num_node_messages: [1]
-      node_message:
-        normalize_degrees: [True]
-        output_dim: [64, 128, 256]
-      dropout: [0.0]
-      bin_size: [80, 160, 320]
-      kernel:
-        clip_value_low: [0.0]
-    num_graph_layers_common: [2, 3, 4]
-    num_graph_layers_energy: [2, 3, 4]
+  sched:  # asha, hyperband
+  search_alg:  # bayes, bohb, hyperopt, nevergrad, scikit
+  default_metric: "val_loss"
+  default_mode: "min"
   # Tune schedule specific parameters
   asha:
     max_t: 100
-    reduction_factor: 3
+    reduction_factor: 4
     brackets: 1
     grace_period: 5
   hyperband:
-    max_t: 100
-    reduction_factor: 3
+    max_t: 200
+    reduction_factor: 4
+  hyperopt:
+    n_random_steps: 10
+  nevergrad:
+    n_random_steps: 10
 
 train_test_datasets:
   delphes:
@@ -217,9 +236,16 @@ train_test_datasets:
       - delphes_pf
 
 validation_dataset: delphes_pf
+validation_batch_size: 5
+validation_num_events: 100
+
+evaluation_datasets:
+  delphes_pf:
+    batch_size: 10
+    num_events: -1
 
 datasets:
   delphes_pf:
-    version: 1.0.1
-    data_dir: /workspace/tensorflow_datasets
+    version: 1.1.0
+    data_dir: tensorflow_datasets
     manual_dir:
